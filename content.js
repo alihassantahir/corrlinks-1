@@ -31,6 +31,14 @@ function requestState() {
   });
 }
 
+
+
+window.onload = () => {
+requestState()
+
+  };
+
+
 function isLoggedOut() { // This fn sends msg to BG script to ABORT if user is logged out... 
 const loginElement = document.querySelector('img[alt="Logged Out"]'); 
 
@@ -47,7 +55,6 @@ function setState() {
 }
 
 
-requestState()
 
 function isDefaultPage() {
   const targetUrls = [
@@ -340,7 +347,10 @@ async function startIntervalForInboxMonitor() {
   let pausedAnnounced = false;
   const fn = 'startIntervalForInboxMonitor:';
   STATE.inboxRefreshInterval = window.setInterval(async () => {
-  isLoggedOut()
+
+
+    isLoggedOut()
+
     console.debug(fn, `interval cycle: ${++STATE.inboxMonitorCycles}`);
     if (STATE.stopNow) {
       paused = true;
@@ -636,5 +646,6 @@ function simulateClick(element) {
     element.focus(); 
   }, 100); 
 }
+
 
 
