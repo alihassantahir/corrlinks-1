@@ -90,26 +90,12 @@ function stop() {
 
 
 
-function reloadTab(tabId, tabURL) {
-  if (!tabId) return;
+function reloadTab(tabId) {
+    if (!tabId) return;
 
-  if (tabURL) {
-
-    chrome.tabs.update(tabId, { url: tabURL }, () => {
-      if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError.message);
-      }
-    });
-  } 
-
-else {
-    chrome.tabs.reload(tabId, () => {
-      if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError.message);
-      }
-    });
-  }
+    chrome.tabs.reload(tabId);
 }
+
 
 
 function handleInvalidSite(tab, msg) {
