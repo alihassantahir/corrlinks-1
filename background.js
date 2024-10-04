@@ -55,31 +55,25 @@ function start() {
     const tab = tabs[0];
     STATE.tab = tab;
 
-    chrome.tabs.update(tab.id, { url: C.WEBSITE_DETAILS.INBOX }, function() {
-      chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+    
+    const result = isValidSite(tab);
 
-        if (tabId === tab.id && changeInfo.status === 'complete') {
-          chrome.tabs.onUpdated.removeListener(listener);
-          const result = isValidSite(tab);
+    if (!result.isValid) {
+      handleInvalidSite(tab, result.msg);
+      return;
+    }
 
-          if (!result.isValid) {
-            handleInvalidSite(tab, result.msg);
-            return;
-          }
+    console.debug(fn, 'completed. Handing off to serverMessageListener');
 
-          console.debug(fn, 'completed. Handing off to serverMessageListener');
+    chrome.action.setIcon(onIcon);
+    STATE.running = true;
 
-          chrome.action.setIcon(onIcon);
-          STATE.running = true;
+    const msg = {
+      message: "START_INTEGRATION"
+    };
+    sendMessageToTab(tab.id, msg);
+    setupMessageListeners();
 
-          const msg = {
-            message: "START_INTEGRATION"
-          };
-          sendMessageToTab(tab.id, msg);
-          setupMessageListeners();
-        }
-      });
-    });
   });
 }
 
