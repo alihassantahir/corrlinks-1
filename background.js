@@ -34,12 +34,13 @@ chrome.runtime.onInstalled.addListener(function(details) {
   console.log(fn, msg);
 });
 
+
+
 chrome.action.onClicked.addListener(function() {
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     if (!STATE.running) {
       start();
     } else {
-      reloadTab(STATE.tab?.id);
       stop();
 
     }
@@ -87,15 +88,6 @@ function stop() {
 
   resetState();
 }
-
-
-
-function reloadTab(tabId) {
-    if (!tabId) return;
-
-    chrome.tabs.reload(tabId);
-}
-
 
 
 function handleInvalidSite(tab, msg) {
@@ -152,7 +144,6 @@ function showAlert(tabID, tabURL, message) {
 
 function resetState() {
   STATE.running = false;
-  STATE.tab = null;
   chrome.action.setIcon(offIcon);
   removeMessageListeners();
 }
@@ -206,17 +197,19 @@ function chrome_runtime_onMessage_listener(request, sender, sendResponse) {
   sendResponse({ status: "Received Msg" });
 }
 
+
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'getState') {
-    sendResponse({ state: STATE.running });
+  switch (request.action) {
+    case 'getState':
+      sendResponse({ state: STATE.running });
+      break;
+    case 'setState':
+      stop();
+      break;
   }
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'setState') {
-   	stop()
-  }
-});
 
 chrome.tabs.onRemoved.addListener((tabId) => {
   if (STATE.tab && STATE.tab.id === tabId) {
