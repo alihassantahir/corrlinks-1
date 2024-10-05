@@ -205,6 +205,7 @@ const tabId = sender.tab ? sender.tab.id : undefined;
   switch (request.action) {
     case 'getState':
       if (tabId && STATE.tab && tabId === STATE.tab.id) { // This ensure only 1x Tab stays active by ignoring requests from other tabs
+	      console.log(`Request from the Target tab`);
         sendResponse({ state: STATE.running });
       } 
       break;
