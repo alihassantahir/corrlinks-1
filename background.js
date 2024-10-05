@@ -144,6 +144,7 @@ function showAlert(tabID, tabURL, message) {
 
 function resetState() {
   STATE.running = false;
+  STATE.tab = false;
   chrome.action.setIcon(offIcon);
   removeMessageListeners();
 }
