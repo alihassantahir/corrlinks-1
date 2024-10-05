@@ -133,8 +133,7 @@ function showAlert(tabID, tabURL, message) {
     tabURL?.startsWith("view-source:") // View source 
   )
 
- return // Should return because can't show alerts on these page and abort
-
+ return // Should return because can't show alerts on these pages
   chrome.scripting.executeScript({
     target: { tabId: tabID },
     func: (alertMessage) => alert(alertMessage),
