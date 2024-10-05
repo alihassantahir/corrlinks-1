@@ -72,7 +72,7 @@ function start() {
     const msg = {
       message: "START_INTEGRATION"
     };
-    sendMessageToTab(tab.id, msg);
+    sendMessageToTab(STATE.tab.id, msg);
     setupMessageListeners();
 
   });
@@ -200,16 +200,20 @@ function chrome_runtime_onMessage_listener(request, sender, sendResponse) {
 
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+const tabId = sender.tab ? sender.tab.id : undefined;
+  
   switch (request.action) {
     case 'getState':
-      sendResponse({ state: STATE.running });
+      if (tabId && STATE.tab && tabId === STATE.tab.id) { // This ensure only 1x Tab stays active by ignoring requests from other tabs
+        sendResponse({ state: STATE.running });
+      } 
       break;
+      
     case 'setState':
-      stop();
+        stop();
       break;
   }
 });
-
 
 chrome.tabs.onRemoved.addListener((tabId) => {
   if (STATE.tab && STATE.tab.id === tabId) {
