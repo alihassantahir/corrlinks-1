@@ -135,7 +135,6 @@ function resetState() {
   STATE.running = false;
   STATE.tab = null;
   chrome.action.setIcon(offIcon);
-  removeMessageListeners();
 }
 
 function sendMessageToTab(tabId, message) {
