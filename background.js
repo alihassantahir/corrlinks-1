@@ -1,8 +1,6 @@
 const APPNAME = 'Corrlinks Extension 1';
 const SERVER = 'https://theeblvd.ngrok.io';
-console.debug('background:', `${APPNAME} background.js started`);
 console.debug(`Current ngrok server address: ${SERVER}`);
-console.log('To see all logs, set the console to VERBOSE');
 
 const C = {
   WEBSITE_DETAILS: {
@@ -28,13 +26,6 @@ let STATE = {
   tab: null
 };
 
-chrome.runtime.onInstalled.addListener(function(details) {
-  const fn = 'chrome.runtime.onInstalled.addListener:';
-  let msg = details.reason === 'install' ? `${APPNAME} Installed` : `${APPNAME} update Installed`;
-  console.log(fn, msg);
-});
-
-
 
 chrome.action.onClicked.addListener(function() {
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -51,7 +42,7 @@ function start() {
   const fn = 'start:';
   if (STATE.running) return false;
 
-  console.debug(fn);
+  console.debug("Receiver Extension: Trying to initiate...");
   chrome.tabs.query({ currentWindow: true, active: true }, function(tabs) {
     const tab = tabs[0];
     STATE.tab = tab;
@@ -64,7 +55,7 @@ function start() {
       return;
     }
 
-    console.debug(fn, 'completed. Handing off to serverMessageListener');
+    console.debug(fn, 'Receiver Extension: Initiated successfully...');
 
     chrome.action.setIcon(onIcon);
     STATE.running = true;
@@ -73,7 +64,6 @@ function start() {
       message: "START_INTEGRATION"
     };
     sendMessageToTab(STATE.tab.id, msg);
-    setupMessageListeners();
 
   });
 }
@@ -179,39 +169,28 @@ console.log("Sending request to:", url);
     });
 }
 
-function setupMessageListeners() {
-  console.debug('setupMessageListeners:');
-  chrome.runtime.onMessage.addListener(chrome_runtime_onMessage_listener);
-}
-
-function removeMessageListeners() {
-  console.debug('removeMessageListeners:');
-  chrome.runtime.onMessage.removeListener(chrome_runtime_onMessage_listener);
-}
-
-function chrome_runtime_onMessage_listener(request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log('chrome_runtime_onMessage_listener:', { request });
+
   if (request.message === "QUEUE_NEW_MESSAGE_TO_WHATS_APP") {
     sendMessageToServer(request.data);
+    sendResponse({ status: "Received Msg" });
+    return;
   }
-  sendResponse({ status: "Received Msg" });
-}
 
-
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-const tabId = sender.tab ? sender.tab.id : undefined;
+  const tabId = sender.tab ? sender.tab.id : undefined;
   
   switch (request.action) {
     case 'getState':
-      if (tabId && STATE.tab && tabId === STATE.tab.id) { // This ensure only 1x Tab stays active by ignoring requests from other tabs
-	      console.log(`Request from the Target tab`);
+      if (tabId && STATE.tab && tabId === STATE.tab.id) { // Ensure only 1x Tab stays active by ignoring requests from other tabs
+        console.log(`Request from the Target tab`);
         sendResponse({ state: STATE.running });
-      } 
+      }
       break;
-      
+
     case 'setState':
-        stop();
+      stop();
+      sendResponse({ status: "State Stopped" });
       break;
   }
 });
