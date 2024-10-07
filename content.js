@@ -79,7 +79,8 @@ const utils = {
     readMessage: {
       retrieveEmailAddress: () => {
         const fn = 'retrieveEmailAddress:';
-        const multiselectElement = document.querySelector('ejs-multiselect[data-initial-value]');
+        const multiselectElement = document.querySelector('input[formcontrolname]ejs-multiselect[data-initial-value]');
+	const multiselect = document.querySelector('ejs-multiselect[formcontrolname="contacts"]');
         const result = multiselectElement ? multiselectElement.getAttribute('data-initial-value') : null;
         console.debug(fn, ` result=${result}`);
         return result;
