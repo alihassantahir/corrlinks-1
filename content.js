@@ -95,33 +95,34 @@ const utils = {
         console.debug(fn, ` result=${result}`);
         return result;
       },
-      retrieveAccountAddress: async () => {
-        const fn = 'retrieveAccountAddress:';
+  retrieveAccountAddress: async () => {
+  const fn = 'retrieveAccountAddress:';
 
+  const alreadyOpenedItem = document.getElementById('loggedInUser'); // Update
 
- const alreadyopenedItem = document.getElementById('loggedInUser');  //Update
+  if (alreadyOpenedItem) {
+    return Promise.resolve(alreadyOpenedItem.innerText);
+  } 
 
-      if (alreadyopenedItem) {
+  const userButton = document.querySelector('header button:has(div.user-initials)');
+  if (!userButton) {
+    return Promise.reject();
+  }
+
+  userButton.click();
+
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const listItem = document.getElementById('loggedInUser');
+
+      if (listItem) {
         resolve(listItem.innerText);
-	return
-      } 
-        
-        const userButton = document.querySelector('header button:has(div.user-initials)');
-        userButton.click();
-
-        return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            const listItem = document.getElementById('loggedInUser');
-
-            if (listItem) {
-              resolve(listItem.innerText);
-            } else {
-              reject();
-            }
-          }, 500);
-        });
-      },
-
+      } else {
+        reject();
+      }
+    }, 500);
+  });
+},
       retrieveFirstLine: () => {
         const fn = 'retrieveFirstLine:';
         const found = document.querySelector('textarea[formcontrolname="message"]');
