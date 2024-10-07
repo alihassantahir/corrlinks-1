@@ -42,7 +42,7 @@ requestState()
 function isLoggedOut() { // This fn sends msg to BG script to ABORT if the user logs out... 
 const loginElement = document.querySelector('img[alt="Logged Out"]'); 
 
-  if (loginElement && isLoginPage() ) {
+  if (loginElement && isLoginPage() ) { // To ensure user is really logged out...
     console.debug('Login element exists. Sending STOP message.');
     	setState();
       STATE.stopNow = true;
@@ -79,9 +79,8 @@ const utils = {
     readMessage: {
       retrieveEmailAddress: () => {
         const fn = 'retrieveEmailAddress:';
-        const multiselectElement = document.querySelector('input[formcontrolname]ejs-multiselect[data-initial-value]');
-	const multiselect = document.querySelector('ejs-multiselect[formcontrolname="contacts"]');
-        const result = multiselectElement ? multiselectElement.getAttribute('data-initial-value') : null;
+        const multiselectElement = document.querySelector('[formcontrolname="contacts"]');  //More generic selector
+        const result = multiselectElement ? multiselectElement.getAttribute('data-initial-value') : null; 
         console.debug(fn, ` result=${result}`);
         return result;
       },
@@ -98,7 +97,7 @@ const utils = {
   retrieveAccountAddress: async () => {
   const fn = 'retrieveAccountAddress:';
 
-  const alreadyOpenedItem = document.getElementById('loggedInUser'); // Update
+  const alreadyOpenedItem = document.getElementById('loggedInUser'); // Bug fixed here
 
   if (alreadyOpenedItem) {
     return Promise.resolve(alreadyOpenedItem.innerText);
@@ -141,7 +140,7 @@ const utils = {
         const fn = 'closeReadMessage:';
         console.debug(fn, 'called');
         setTimeout(() => {
-          const cancelButton = [...document.querySelectorAll('button.e-btn')].filter(
+          const cancelButton = [...document.querySelectorAll('button')].filter(
             btn => btn.textContent.trim() === 'Close'
           )[0];
 
@@ -182,7 +181,7 @@ const utils = {
       },
       isDisplayingMessage: () => {
         const fn = 'isDisplayingMessage:';
-        const result = document.title.includes('Inbox Message') && window.location.href.includes("https://www.corrlinks.com/en-US/mailbox/inbox/message/");
+        const result = document.title.includes('Inbox Message') && window.location.href.includes("https://www.corrlinks.com/en-US/mailbox/inbox/message");
         console.debug(fn, `result=${result}`);
         return result;
       },
@@ -235,13 +234,23 @@ const utils = {
       },
       getClickableItem_selectedMessage: () => {
         const fn = 'getClickableItem_selectedMessage:';
-
-        let result = document.querySelector('tr[aria-selected="true"]');
-
+	let messageLists=document.querySelector('app-message-list')
+        if(messageLists)  //Try to Find in App Message list first
+        {
+        let result = messageLists.querySelector('tr[aria-selected="true"]');
         result = result?.closest('tr')?.querySelector('td');
-
         console.debug(fn, `result=${result}`);
         return result;
+        }
+        else   //Fall back
+	{
+
+        let result = document.querySelector('tr[aria-selected="true"]');
+	const row = result?.closest('tr');
+        if (row) result = row.querySelector('td'); 
+        console.debug(fn, `result=${result}`);
+        return result;
+        }
       },
       getClickableItem_unreadMessage: () => {
         const fn = 'getClickableItem_unreadMessage:';
