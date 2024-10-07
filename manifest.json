@@ -2,7 +2,7 @@
 	"manifest_version": 3,
 	"name": "Corrlinks Extension 1 - Send messages FROM Corrlinks",
 	"description": "This extension is designed to collect messages from Corrlinks and deliver them to the backend service.",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"author": "Shaun Underwood",
 	"action": {
 		"default_icon": {
