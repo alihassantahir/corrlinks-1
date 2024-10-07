@@ -96,6 +96,15 @@ const utils = {
       },
       retrieveAccountAddress: async () => {
         const fn = 'retrieveAccountAddress:';
+
+
+ const alreadyopenedItem = document.getElementById('loggedInUser');  //Update
+
+      if (alreadyopenedItem) {
+        resolve(listItem.innerText);
+	return
+      } 
+        
         const userButton = document.querySelector('header button:has(div.user-initials)');
         userButton.click();
 
@@ -106,7 +115,7 @@ const utils = {
             if (listItem) {
               resolve(listItem.innerText);
             } else {
-              reject(new Error('List item not found'));
+              reject();
             }
           }, 500);
         });
