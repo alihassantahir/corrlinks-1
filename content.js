@@ -40,11 +40,8 @@ requestState()
 
 
 function isLoggedOut() { // This fn sends msg to BG script to ABORT if the user logs out... 
-const loginElement = document.querySelector('img[alt="Logged Out"]'); 
-
-  if (loginElement && isLoginPage() ) { // To ensure user is really logged out...
-    console.debug('Login element exists. Sending STOP message.');
-    	setState();
+  if (isLoginPage() ) { 
+	setState();
       STATE.stopNow = true;
       
   }
