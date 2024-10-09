@@ -11,7 +11,7 @@ const STATE = {
   inboxRefreshInterval: null,
   messageRefreshInterval: null,
   inboxMonitorCycles: 0,
-  stopNow: false,
+  stopNow: true,
 };
 
 function requestState() {
@@ -35,7 +35,6 @@ function requestState() {
 
 window.onload = () => {
 requestState()
-
   };
 
 
@@ -407,11 +406,8 @@ async function startIntervalForInboxMonitor() {
 function startUp() {
   const fn = 'startUp:';
   console.debug(fn);
-
   STATE.stopNow = false;
-
   startInboxMonitor();
-
   console.debug(fn, 'complete');
 }
 
@@ -436,7 +432,6 @@ chrome.runtime.onMessage.addListener(
 
   }
 );
-
 const countries = [{
     code: 'US',
     label: 'United States',
