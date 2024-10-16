@@ -14,7 +14,9 @@ const STATE = {
   stopNow: true,
 };
 
-function requestState() {
+function requestState()
+
+{
 
   chrome.runtime.sendMessage({
     action: 'getState'
@@ -23,7 +25,10 @@ function requestState() {
       const currentState = response.state;
 
       if (currentState) {
-
+        if (isLoginPage()) {
+          autoLogin()
+          return
+        }
         startUp();
 
       }
@@ -31,26 +36,15 @@ function requestState() {
   });
 }
 
-
-
 window.onload = () => {
-requestState()
-  };
-
-
-function isLoggedOut() { // This fn sends msg to BG script to ABORT if the user logs out... 
-  if (isLoginPage() ) { 
-	setState();
-      STATE.stopNow = true;
-      
-  }
-}
+  requestState()
+};
 
 function setState() {
-  chrome.runtime.sendMessage({ action: 'setState' });
+  chrome.runtime.sendMessage({
+    action: 'setState'
+  });
 }
-
-
 
 function isDefaultPage() {
   const targetUrls = [
@@ -75,9 +69,9 @@ const utils = {
     readMessage: {
       retrieveEmailAddress: () => {
         const fn = 'retrieveEmailAddress:';
-        const multiselectElement = document.querySelector('[formcontrolname="contacts"]');  //More generic selector
-        const result = multiselectElement ? multiselectElement.getAttribute('data-initial-value') : null; 
-        console.debug(fn, ` result=${result}`);
+        const multiselectElement = document.querySelector('[formcontrolname="contacts"]'); // More generic selector
+        const result = multiselectElement ? multiselectElement.getAttribute('data-initial-value') : null;
+        console.debug(fn, ` result = $ { result }`);
         return result;
       },
       retrieveSubjectLine: () => {
@@ -87,65 +81,66 @@ const utils = {
 
         const result = found ? found.value : false;
 
-        console.debug(fn, ` result=${result}`);
+        console.debug(fn, ` result = $ { result }`);
         return result;
       },
-  retrieveAccountAddress: async () => {
-  const fn = 'retrieveAccountAddress:';
+      retrieveAccountAddress: async () => {
+        const fn = 'retrieveAccountAddress:';
 
-  const alreadyOpenedItem = document.getElementById('loggedInUser'); // Bug fixed here
+        const alreadyOpenedItem = document.getElementById('loggedInUser'); // Bug fixed here
 
-  if (alreadyOpenedItem) {
-    return Promise.resolve(alreadyOpenedItem.innerText);
-  } 
+        if (alreadyOpenedItem) {
+          return Promise.resolve(alreadyOpenedItem.innerText);
+        }
 
-  const userButton = document.querySelector('header button:has(div.user-initials)');
-  if (!userButton) {
-    return Promise.reject();
-  }
+        const userButton = document.querySelector('header button:has(div.user-initials)');
+        if (!userButton) {
+          return Promise.reject();
+        }
 
-  userButton.click();
+        userButton.click();
 
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const listItem = document.getElementById('loggedInUser');
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+              const listItem = document.getElementById('loggedInUser');
 
-      if (listItem) {
-        resolve(listItem.innerText);
-      } else {
-        reject();
-      }
-    }, 500);
-  });
-},
+              if (listItem) {
+                resolve(listItem.innerText);
+              } else {
+                reject();
+              }
+            },
+            500);
+        });
+      },
       retrieveFirstLine: () => {
         const fn = 'retrieveFirstLine:';
         const found = document.querySelector('textarea[formcontrolname="message"]');
         const result = found ? found.value : false;
-        console.debug(fn, ` result=${result}`);
+        console.debug(fn, ` result = $ { result }`);
         return result;
       },
       retrieveTextarea: () => {
         const fn = 'retrieveTextarea:';
         const found = document.querySelector('textarea[formcontrolname="message"]');
         const result = found ? found.value : false;
-        console.debug(fn, ` result=${result}`);
+        console.debug(fn, ` result = $ { result }`);
         return result;
       },
       closeReadMessage: () => {
         const fn = 'closeReadMessage:';
         console.debug(fn, 'called');
         setTimeout(() => {
-          const cancelButton = [...document.querySelectorAll('button')].filter(
-            btn => btn.textContent.trim() === 'Close'
-          )[0];
+            const cancelButton = [...document.querySelectorAll('button')].filter(
+              btn => btn.textContent.trim() === 'Close')[0];
 
-          if (cancelButton) {
+            if (cancelButton) {
 
-            simulateClick(cancelButton)
-            console.debug(fn, 'Button clicked');
-          }
-        }, 1000);
+              simulateClick(cancelButton)
+              console.debug(fn, 'Button clicked');
+            }
+          },
+          1000);
       },
 
       retrieveMessageFromUI: async () => {
@@ -173,15 +168,13 @@ const utils = {
 
         console.debug(fn, 'data collected', data);
         return data;
-
       },
       isDisplayingMessage: () => {
         const fn = 'isDisplayingMessage:';
         const result = document.title.includes('Inbox Message') && window.location.href.includes("https://www.corrlinks.com/en-US/mailbox/inbox/message");
-        console.debug(fn, `result=${result}`);
+        console.debug(fn, `result = $ { result }`);
         return result;
       },
-
     },
     inbox: {
       isDisplayingInbox: () => {
@@ -191,13 +184,13 @@ const utils = {
 
         const result = urlMatches;
 
-        console.debug(fn, `result=${result}`);
+        console.debug(fn, `result = $ { result }`);
         return result;
       },
       getUnreadMessagesCheckbox: () => {
         const fn = 'getUnreadMessagesCheckbox:';
         let unreadMessagesCheckbox = document.querySelector('input[type="checkbox"][formcontrolname="unreadMessagesOnly"]');
-        console.debug(fn, `result=`, {
+        console.debug(fn, `result =`, {
           unreadMessagesCheckbox
         });
         return unreadMessagesCheckbox;
@@ -207,7 +200,8 @@ const utils = {
         console.debug(fn);
 
         let unreadMessagesCheckbox = utils.page.inbox.getUnreadMessagesCheckbox();
-        if (!unreadMessagesCheckbox) return
+        if (!unreadMessagesCheckbox)
+          return
         if (!unreadMessagesCheckbox.checked) {
           console.debug(fn, 'setting UI to only display unread messages');
           unreadMessagesCheckbox.click();
@@ -219,39 +213,42 @@ const utils = {
         const fn = 'refresh:';
         console.debug(fn, 'called');
 
+        requestState();
+
         const unreadMessagesCheckbox = utils.page.inbox.getUnreadMessagesCheckbox();
         if (!unreadMessagesCheckbox && (!isLoginPage() || isDefaultPage())) {
           window.location.href = "https://www.corrlinks.com/en-US/mailbox/inbox"
-
+          return
         }
 
-        if (unreadMessagesCheckbox) unreadMessagesCheckbox.click();
-
+        if (unreadMessagesCheckbox) {
+          unreadMessagesCheckbox.click()
+        }
       },
       getClickableItem_selectedMessage: () => {
         const fn = 'getClickableItem_selectedMessage:';
-	let messageLists=document.querySelector('app-message-list')
-        if(messageLists)  //Try to Find in App Message list first
+        let messageLists = document.querySelector('app-message-list')
+        if (messageLists) // Try to Find in App Message list first
         {
-        let result = messageLists.querySelector('tr[aria-selected="true"]');
-        result = result?.closest('tr')?.querySelector('td');
-        console.debug(fn, `result=${result}`);
-        return result;
-        }
-        else   //Fall back
-	{
+          let result = messageLists.querySelector('tr[aria-selected="true"]');
+          result = result?.closest('tr')?.querySelector('td');
+          console.debug(fn, `result = $ { result }`);
+          return result;
+        } else // Fall back
+        {
 
-        let result = document.querySelector('tr[aria-selected="true"]');
-	const row = result?.closest('tr');
-        if (row) result = row.querySelector('td'); 
-        console.debug(fn, `result=${result}`);
-        return result;
+          let result = document.querySelector('tr[aria-selected="true"]');
+          const row = result?.closest('tr');
+          if (row)
+            result = row.querySelector('td');
+          console.debug(fn, `result = $ { result }`);
+          return result;
         }
       },
       getClickableItem_unreadMessage: () => {
         const fn = 'getClickableItem_unreadMessage:';
         const result = document.querySelector('tr.e-row.grid-row-bold') || null;
-        console.debug(fn, `result=${result}`);
+        console.debug(fn, `result = $ { result }`);
         return result;
       },
       openMessageCollectSendAndClose: async (clickableItem) => {
@@ -286,17 +283,15 @@ const utils = {
             message: "QUEUE_NEW_MESSAGE_TO_WHATS_APP"
           };
 
-
           chrome.runtime.sendMessage(null, msg);
         }
 
         utils.page.readMessage.closeReadMessage();
-
       },
       hasNewMessage: () => {
         const fn = 'hasNewMessage:';
         const result = !!window.document.querySelectorAll('td.BoldItem').length;
-        console.debug(fn, `result=${result}`);
+        console.debug(fn, `result = $ { result }`);
         return result;
       },
     }
@@ -305,7 +300,7 @@ const utils = {
     isValidDataset: (potentialDataToSend) => {
       const fn = 'isValidDataset:';
       const result = potentialDataToSend.mobileNumber && potentialDataToSend.message && potentialDataToSend.emailAddress && potentialDataToSend.subject && potentialDataToSend.accountAddress;
-      console.debug(fn, ` result=${result}`);
+      console.debug(fn, ` result = $ { result }`);
       return result;
     },
 
@@ -317,7 +312,7 @@ const utils = {
       return new Promise(async (resolve) => {
         const startTime = Date.now();
 
-        const intervalId =  setInterval( async () => {
+        const intervalId = setInterval(async () => {
 
           if (STATE.stopNow) {
             clearInterval(STATE.intervalId);
@@ -345,7 +340,6 @@ const utils = {
         }, checkInterval);
       });
     }
-
   }
 }
 
@@ -353,7 +347,6 @@ function startInboxMonitor() {
   const fn = 'startInboxMonitor:';
   console.debug(fn);
   console.debug(fn, 'IMPORTANT: uncomment utils.page.inbox.setDisplayToUnreadMessagesOnly()');
-  utils.page.inbox.setDisplayToUnreadMessagesOnly();
   startIntervalForInboxMonitor();
 }
 
@@ -362,12 +355,11 @@ async function startIntervalForInboxMonitor() {
   let paused = false;
   let pausedAnnounced = false;
   const fn = 'startIntervalForInboxMonitor:';
+
+  window.clearInterval(STATE.inboxRefreshInterval);
+
   STATE.inboxRefreshInterval = window.setInterval(async () => {
-
-
-    isLoggedOut()
-
-    console.debug(fn, `interval cycle: ${++STATE.inboxMonitorCycles}`);
+    console.debug(fn, `interval cycle : $ { ++STATE.inboxMonitorCycles }`);
     if (STATE.stopNow) {
       paused = true;
       pausedAnnounced = true;
@@ -399,7 +391,6 @@ async function startIntervalForInboxMonitor() {
     paused = false;
     pausedAnnounced = false;
     console.debug(fn, 'Interval UNPAUSED');
-
   }, REFRESH_INTERVAL * 1000);
 }
 
@@ -412,7 +403,7 @@ function startUp() {
 }
 
 chrome.runtime.onMessage.addListener(
-  function(request, sender, sendResponse) {
+  async function(request, sender, sendResponse) {
     const fn = 'content.js: chrome.runtime.onMessage.addListener:';
     console.debug(fn, {
       request,
@@ -422,6 +413,27 @@ chrome.runtime.onMessage.addListener(
     if (request.message === "START_INTEGRATION") {
       console.log('Start Integration message received');
       startUp();
+
+      const corrlinks_account = await utils.page.readMessage.retrieveAccountAddress();
+
+      if (corrlinks_account) {
+
+        const password = prompt("Please enter password for " + corrlinks_account + ":");
+
+
+
+        if (password === null) {
+          setState();
+          return;
+        }
+
+        sendMessage({
+          action: "SET_CORRLINKS_ACCOUNT",
+          corrlinks_account,
+          password // Include the password
+        });
+      }
+      return;
     }
     if (request.message === "STOP_INTEGRATION") {
       console.log('Stop Integration message received');
@@ -429,9 +441,8 @@ chrome.runtime.onMessage.addListener(
       console.debug(fn, 'stopNow set to true');
       return;
     }
+  });
 
-  }
-);
 const countries = [{
     code: 'US',
     label: 'United States',
@@ -539,6 +550,8 @@ function checkInternationalPhone(strPhone) {
 
 }
 
+
+
 function checkAreaCode(val) {
 
   var res = false;
@@ -630,8 +643,12 @@ function formatPhoneNumber(localNumber) {
   }
 }
 
+
+
+
 function simulateClick(element) {
-  if (!element) return;
+  if (!element)
+    return;
 
   const mouseDownEvent = new MouseEvent('mousedown', {
     bubbles: true,
@@ -653,11 +670,176 @@ function simulateClick(element) {
 
   element.dispatchEvent(mouseDownEvent);
   setTimeout(() => {
-    element.dispatchEvent(mouseUpEvent);
-    element.dispatchEvent(clickEvent); 
-    element.focus(); 
-  }, 100); 
+      element.dispatchEvent(mouseUpEvent);
+      element.dispatchEvent(clickEvent);
+      element.focus();
+    },
+    100);
 }
 
+let lastLoginTry = null;
 
+function autoLogin() {
+  const currentTime = new Date();
 
+  // Throttling logic for login attempts
+  if (lastLoginTry && (currentTime - lastLoginTry < 8000)) {
+    return;
+  } else if (lastLoginTry && (currentTime - lastLoginTry > 30000)) {
+    return;
+  }
+
+  lastLoginTry = currentTime;
+
+  fetchEmail((username) => {
+    if (!username)
+      return; // Exit if username is not retrieved
+
+    fetchPassword((password) => {
+      if (!password)
+        return; // Exit if password is not retrieved
+
+      const emailField = document.querySelector('input[formcontrolname="email"]');
+      const passwordField = document.querySelector('input[formcontrolname="password"]');
+
+      if (emailField && passwordField) {
+        setField(emailField, username);
+        setField(passwordField, password);
+
+        const loginButton = Array.from(document.querySelectorAll('button'))
+          .find(button => button.innerText === 'Login');
+
+        setTimeout(() => {
+            if (loginButton) {
+              loginButton.click();
+            }
+          },
+          3000);
+      }
+    });
+  });
+}
+
+function setField(field, value) {
+  if (field) {
+    simulateClick(field);
+    field.value = value;
+    simulateInput(field);
+    blurElement(field);
+  }
+}
+
+function fetchEmail(callback) {
+  chrome.runtime.sendMessage({
+    action: 'getEmailAddress'
+  }, (response) => {
+    if (response.email) {
+      callback(response.email);
+    } else {
+      setState()
+      console.error("Failed to retrieve email address.");
+      callback(null);
+    }
+  });
+}
+
+function fetchPassword(callback) {
+  chrome.runtime.sendMessage({
+    action: 'getPswd'
+  }, (response) => {
+    if (response.pswd) {
+      callback(response.pswd);
+    } else {
+
+      setState()
+      console.error("Failed to retrieve password.");
+      callback(null);
+    }
+  });
+}
+
+function sendMessage(message) {
+  chrome.runtime.sendMessage(null, message);
+}
+
+function simulateInput(element) {
+  if (!element)
+    return;
+  const KBevent = new KeyboardEvent('keyup', {
+    bubbles: true,
+    cancelable: true,
+    key: 'a',
+    code: 'KeyA',
+  });
+  element.dispatchEvent(KBevent);
+  element.dispatchEvent(new Event('input', {
+    bubbles: true
+  }));
+  element.dispatchEvent(new Event('change', {
+    bubbles: true
+  }));
+}
+
+function simulateClick(element, nofocus) {
+  if (!element)
+    return;
+
+  const mouseDownEvent = new MouseEvent('mousedown', {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+  });
+
+  const mouseUpEvent = new MouseEvent('mouseup', {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+  });
+
+  const clickEvent = new MouseEvent('click', {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+  });
+
+  element.dispatchEvent(mouseDownEvent);
+
+  setTimeout(() => {
+      element.dispatchEvent(mouseUpEvent);
+      if (!nofocus)
+        element.focus();
+
+      element.dispatchEvent(clickEvent);
+    },
+    100);
+}
+
+function blurElement(element) {
+  if (!element)
+    return;
+
+  const event = new FocusEvent('blur', {
+    bubbles: true,
+    cancelable: true,
+    view: window
+  });
+
+  element.dispatchEvent(event);
+}
+
+function specialClick(element) {
+  if (!element)
+    return
+  const mousedownEvent = new MouseEvent('mousedown', {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+  });
+  const mouseupEvent = new MouseEvent('mouseup', {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+  });
+  element.dispatchEvent(mousedownEvent);
+  element.dispatchEvent(mouseupEvent);
+}
