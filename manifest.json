@@ -1,36 +1,34 @@
 {
-	"manifest_version": 3,
-	"name": "Corrlinks Extension 1 - Send messages FROM Corrlinks",
-	"description": "This extension is designed to collect messages from Corrlinks and deliver them to the backend service.",
-	"version": "1.0.3",
-	"author": "Shaun Underwood",
-	"action": {
-		"default_icon": {
-			"128": "images/wc-off.png"
-		},
-		"default_title": "Corrlinks->WhatsApp"
-	},
-  	"icons": {
-  	  "128": "images/wc-off.png"
- 	 },
-	"permissions": [
-		"activeTab",
-		"tabs",
-    		"scripting"
+  "manifest_version": 3,
+  "name": "Corrlinks Extension 1 - Send messages FROM Corrlinks",
+  "description": "This extension is designed to collect messages from Corrlinks and deliver them to the backend service.",
+  "version": "1.0.3",
+  "author": "Shaun Underwood",
+  "action": {
+    "default_icon": {
+      "128": "images/wc-off.png"
+    },
+    "default_title": "Corrlinks->WhatsApp"
+  },
+  "icons": {
+    "128": "images/wc-off.png"
+  },
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "scripting"
 
-	],
-	"host_permissions": [
-		"https://*.ngrok.io/*"
-	],
-	"background": {
-		"service_worker": "background.js"
-	},
-	"content_scripts": [
-		{
-			"matches": [
-				"https://www.corrlinks.com/*"
-			],
-			"js": ["content.js"]
-		}
-	]
+  ],
+  "host_permissions": [
+    "https://*.ngrok.io/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [{
+    "matches": [
+      "https://www.corrlinks.com/*"
+    ],
+    "js": ["content.js"]
+  }]
 }
