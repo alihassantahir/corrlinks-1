@@ -18,4 +18,8 @@ To stop an extension, click the same button again or close the tab (Reloading th
 
 
 ## Automatic Termination:
-When the user logs out after activating the extension, it will automatically HALT itself in the next cycle.
+When the closes the tab/navigates to some other website, it will automatically HALT itself in the next cycle.
+
+## Automatic Login:
+When the user logs out or is logged out by the Corrlinks website, the extension will automatically log in. It does this by requesting the password when the extension is initiated after logging into Corrlinks. The email is already automatically fetched by the extension. 
+
