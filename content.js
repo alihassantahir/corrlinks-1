@@ -420,13 +420,6 @@ chrome.runtime.onMessage.addListener(
 
         const password = prompt("Please enter password for " + corrlinks_account + ":");
 
-
-
-        if (password === null) {
-          setState();
-          return;
-        }
-
         sendMessage({
           action: "SET_CORRLINKS_ACCOUNT",
           corrlinks_account,
