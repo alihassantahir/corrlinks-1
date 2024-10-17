@@ -67,7 +67,10 @@ function start() {
       handleInvalidSite(tab, result.msg)
       return
     }
-
+    else if(!result)
+    {
+      return
+    }
     console.debug(fn, "Receiver Extension: Initiated successfully...")
 
     chrome.action.setIcon(onIcon)
@@ -99,38 +102,49 @@ function handleInvalidSite(tab, msg) {
 }
 
 function isValidSite(tab, loggedOutCheck) {
-  if (tab) {
-    if (tab.url.includes(C.WEBSITE_DETAILS.LOGIN) && !loggedOutCheck) {
-      console.debug("Invalid host:", tab.url)
-      return {
-        isValid: false,
-        msg: "Login Page Detected: Please login and retry."
-      }
-    }
+if(!tab)
+{
+  return {
+    isValid: false,
+    msg: 'Tab not fully loaded. Please try again...'
+  };
+}
 
-    if (!tab.title.includes(C.WEBSITE_DETAILS.TITLE)) {
-      console.debug("Invalid title:", tab.title)
-      return {
-        isValid: false,
-        msg: `This extension can only be activated on a site with the title ${C.WEBSITE_DETAILS.TITLE}`
-      }
-    }
+  if (tab.url.includes(C.WEBSITE_DETAILS.LOGIN) && !loggedOutCheck) {
+    console.debug('Invalid host:', tab.url);
+    return {
+      isValid: false,
+      msg: 'Login Page Detected: Please login and retry.'
+    };
+  }
 
-    if (!tab.url.includes(C.WEBSITE_DETAILS.HOST)) {
-      console.debug("Invalid host:", tab.url)
+  if (!tab.title.includes(C.WEBSITE_DETAILS.TITLE)) {
+    console.debug('Invalid title:', tab.title);
+    return {
+      isValid: false,
+      msg: `This extension can only be activated on a site with the title ${C.WEBSITE_DETAILS.TITLE}`
+    };
+  }
 
-      return {
-        isValid: false,
-        msg: `This extension can only be activated on a site hosted on ${C.WEBSITE_DETAILS.HOST}`
-      }
-    }
+  if (!tab.url.includes(C.WEBSITE_DETAILS.HOST)) {
+    console.debug('Invalid host:', tab.url);
 
     return {
-      isValid: true,
-      msg: "Site is valid."
-    }
+      isValid: false,
+      msg: `This extension can only be activated on a site hosted on ${C.WEBSITE_DETAILS.HOST}`
+    };
   }
+
+  return {
+    isValid: true,
+    msg: 'Site is valid.'
+  };
+  
 }
+
+
+
+
 
 function showAlert(tabID, tabURL, message) {
   if (
