@@ -25,7 +25,6 @@ let STATE = {
   running: false,
   tab: null,
   corrlinks_account: null,
-  pswd: null
 }
 
 chrome.action.onClicked.addListener(function() {
@@ -41,13 +40,6 @@ chrome.action.onClicked.addListener(function() {
   })
 })
 
-function requestCorrlinksEmail() {
-  return STATE.corrlinks_account
-}
-
-function requestCorrlinksPswd() {
-  return STATE.pswd
-}
 
 function start() {
   const fn = "start:"
@@ -171,7 +163,6 @@ function resetState() {
   STATE.running = false
   STATE.tab = null
   STATE.corrlinks_account = null
-  STATE.pswd = null
   chrome.action.setIcon(offIcon)
 }
 
@@ -221,15 +212,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     })
   }
 
-  if (request.action === "getEmailAddress") {
-    sendResponse({
-      email: requestCorrlinksEmail()
-    })
-  } else if (request.action === "getPswd") {
-    sendResponse({
-      pswd: requestCorrlinksPswd()
-    })
-  } else if (request.action === "getState") {
+else if (request.action === "getState") {
     const tabId = sender.tab ? sender.tab.id : undefined
 
     if (tabId && STATE.tab && tabId === STATE.tab.id) {
@@ -246,9 +229,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.action === "SET_CORRLINKS_ACCOUNT") {
     if (request.corrlinks_account) {
       STATE.corrlinks_account = request.corrlinks_account
-    }
-    if (request.password) {
-      STATE.pswd = request.password
     }
   }
 })
