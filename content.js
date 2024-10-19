@@ -1,6 +1,6 @@
 const APPNAME = 'Corrlinks Extension 1';
 const REFRESH_INTERVAL = 10 // This is the time in minutes Extension refreshes the page...
-
+const INBOX_PAGE_LINK ="https://www.corrlinks.com/en-US/mailbox/inbox"
 let C = {
   MESSAGES: {
     START_INTEGRATION: 'START_INTEGRATION',
@@ -13,10 +13,7 @@ const STATE = {
   stopNow: true,
 };
 
-function requestState()
-
-{
-
+function requestState() {
   chrome.runtime.sendMessage({
     action: 'getState'
   }, (response) => {
@@ -25,12 +22,18 @@ function requestState()
 
       if (currentState) {
         if (isLoginPage()) {
+	console.log("Initiating Autologin...")
+	setTimeout(()=>
+	{
           autoLogin()
           return
-        }
-        startUp();
 
+	},1000);
+        }
+
+        startUp();
       }
+
     }
   });
 }
@@ -170,7 +173,7 @@ const utils = {
       },
       isDisplayingMessage: () => {
         const fn = 'isDisplayingMessage:';
-        const result = document.title.includes('Inbox Message') && window.location.href.includes("https://www.corrlinks.com/en-US/mailbox/inbox/message");
+        const result = document.title.includes('Inbox Message') && window.location.href.includes(INBOX_PAGE_LINK);
         console.debug(fn, `result = $ { result }`);
         return result;
       },
@@ -179,7 +182,7 @@ const utils = {
       isDisplayingInbox: () => {
         const fn = 'isDisplayingInbox:';
 
-        const urlMatches = location.href.includes('www.corrlinks.com/en-US/mailbox/inbox');
+        const urlMatches = location.href.includes(INBOX_PAGE_LINK);
 
         const result = urlMatches;
 
@@ -216,7 +219,7 @@ const utils = {
 
         const unreadMessagesCheckbox = utils.page.inbox.getUnreadMessagesCheckbox();
         if (!unreadMessagesCheckbox && (!isLoginPage() || isDefaultPage())) {
-          window.location.href = "https://www.corrlinks.com/en-US/mailbox/inbox"
+          window.location.href = INBOX_PAGE_LINK
           return
         }
 
@@ -416,9 +419,12 @@ chrome.runtime.onMessage.addListener(
 
       if (corrlinks_account) {
 
+        const password = prompt("Please enter password for " + corrlinks_account + ":");
+
         sendMessage({
           action: "SET_CORRLINKS_ACCOUNT",
-          corrlinks_account
+          corrlinks_account,
+          password // Include the password
         });
       }
       return;
@@ -670,43 +676,110 @@ let lastLoginTry = null;
 function autoLogin() {
   const currentTime = new Date();
 
+  // Throttling logic for login attempts
   if (lastLoginTry && (currentTime - lastLoginTry < 8000)) {
-    return;
+    return; 
   } else if (lastLoginTry && (currentTime - lastLoginTry > 30000)) {
-    return;
+    return; 
   }
 
   lastLoginTry = currentTime;
 
-      const emailField = document.querySelector('input[formcontrolname="email"]');
-      const passwordField = document.querySelector('input[formcontrolname="password"]');
+  fetchEmail((username) => {
+    if (!username) return; // Exit if username is not retrieved
 
-      if (emailField && passwordField) {
-        setField(emailField);
-        setField(passwordField);
+    fetchPassword((password) => {
+      if (!password) return; // Exit if password is not retrieved
 
-        const loginButton = Array.from(document.querySelectorAll('button'))
-          .find(button => button.innerText === 'Login');
-
+const loginButton = Array.from(document.querySelectorAll('button'))
+                                  .find(button => button.innerText === 'Login');
         setTimeout(() => {
-            if (loginButton) {
-              loginButton.click();
-            }
-          },
-          3000);
-      }
-}
+          if (loginButton) {
+		clearForm()
+		login(username, password)
+          }
+        }, 3000);
 
-function setField(field, value) {
-  if (field) {
-    simulateClick(field);
-    simulateInput(field);
-    blurElement(field);
-  }
+    });
+  });
 }
 
 
 
+function clearForm()
+{
+const elements = document.querySelectorAll('.ng-valid, .ng-touched, .ng-dirty');
+
+elements.forEach(element => {
+    if (element.classList.contains('ng-valid')) {
+        element.classList.remove('ng-valid');
+        element.classList.add('ng-invalid');
+    }
+    
+    if (element.classList.contains('ng-touched')) {
+        element.classList.remove('ng-touched');
+        element.classList.add('ng-untouched');
+    }
+
+    if (element.classList.contains('ng-dirty')) {
+        element.classList.remove('ng-dirty');
+        element.classList.add('ng-pristine');
+    }
+});
+}
+
+
+
+function login(email,password)
+{
+const url = 'https://www.corrlinks.com/api/session';  //A simple post request to this url allows login...
+
+const data = {
+    emailAddress:email,
+    password: password
+};
+
+fetch(url, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+})
+.then(response => response.json())
+.then(data => {
+
+    console.log('Success:', data);
+          window.location.href = INBOX_PAGE_LINK
+
+})
+.catch((error) => {
+    console.error('Error:', error);
+});
+
+
+}
+function fetchEmail(callback) {
+  chrome.runtime.sendMessage({ action: 'getEmailAddress' }, (response) => {
+    if (response.email) {
+      callback(response.email);
+    } else {
+      console.error("Failed to retrieve email address.");
+      callback(null);
+    }
+  });
+}
+
+function fetchPassword(callback) {
+  chrome.runtime.sendMessage({ action: 'getPswd' }, (response) => {
+    if (response.pswd) {
+      callback(response.pswd);
+    } else {
+      console.error("Failed to retrieve password.");
+      callback(null);
+    }
+  });
+}
 
 
 function sendMessage(message) {
